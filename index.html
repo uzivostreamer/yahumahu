@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+
+  <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.css" rel="stylesheet" />
+
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #eee;
+    }
+
+    header, footer {
+      flex-shrink: 0;
+      padding: 1rem;
+      background: #1e1e1e;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #eee;
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #121212;
+      padding: 1rem;
+    }
+
+    .video-container {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 1rem;
+    }
+
+    .video-js {
+      width: 100% !important;
+      height: auto !important;
+      aspect-ratio: 16 / 9;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stream-btn {
+      padding: 10px 20px;
+      background-color: #333;
+      border: none;
+      border-radius: 4px;
+      color: #eee;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      flex: 1 1 120px;
+      max-width: 150px;
+      text-align: center;
+    }
+
+    .stream-btn:hover {
+      background-color: #555;
+    }
+
+    @media (max-width: 600px) {
+      header, footer {
+        font-size: 1rem;
+        padding: 0.75rem;
+      }
+
+      .video-container {
+        max-width: 100%;
+        margin-bottom: 0.75rem;
+      }
+
+      .stream-btn {
+        flex: 1 1 100%;
+        max-width: none;
+        font-size: 1.1rem;
+        padding: 12px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Panel</h1>
+  </header>
+
+  <main>
+    <div class="video-container">
+      <video
+        id="my-video"
+        class="video-js vjs-default-skin"
+        controls
+        preload="metadata"
+        muted
+        data-setup='{}'>
+        <source src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live1_1200.m3u8" type="application/x-mpegURL" />
+        Your browser doesn't support HTML5 streams.
+      </video>
+    </div>
+
+    <div class="button-container">
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live1_1200.m3u8">Live 1</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live2_1200.m3u8">Live 2</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live3_1200.m3u8">Live 3</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live4_1200.m3u8">Live 4</button>
+      <button class="stream-btn" data-src="https://edge8.pink.rs/pinktv/index.m3u8">Pink</button>
+      <button class="stream-btn" data-src="https://edge8.pink.rs/redtv/index.m3u8">Red TV</button>
+    </div>
+  </main>
+
+  <footer>
+    Haj sad ne radi!
+  </footer>
+
+  <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.min.js"></script>
+  <script>
+    const player = videojs('my-video');
+    player.httpSourceSelector({ default: 'auto' });
+
+    let retryInterval = null;
+
+    function attemptRecovery(src) {
+      if (retryInterval) return; // Веќе се обидуваме
+
+      console.log('Stream error detected. Starting recovery attempts...');
+
+      retryInterval = setInterval(() => {
+        fetch(src, { method: 'HEAD' }).then(res => {
+          if (res.ok) {
+            console.log('Stream is back. Reconnecting...');
+            clearInterval(retryInterval);
+            retryInterval = null;
+            player.src({ src: src, type: 'application/x-mpegURL' });
+            player.load();
+            player.play();
+          }
+        }).catch(() => {
+          // Stream сè уште не е достапен — ќе се проба повторно
+        });
+      }, 10000); // секои 10 секунди
+    }
+
+    player.ready(function () {
+      player.controlBar.addChild('QualitySelector');
+      player.muted(true);
+      player.play();
+    });
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        player.pause();
+      } else {
+        player.play();
+      }
+    });
+
+    player.on('error', () => {
+      const currentSrc = player.currentSrc();
+      attemptRecovery(currentSrc);
+    });
+
+    const buttons = document.querySelectorAll('.stream-btn');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const newSrc = button.getAttribute('data-src');
+        player.pause();
+        player.reset();
+        player.src({ src: newSrc, type: 'application/x-mpegURL' });
+        player.load();
+        player.play();
+
+        if (retryInterval) {
+          clearInterval(retryInterval);
+          retryInterval = null;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
