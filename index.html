@@ -37,6 +37,8 @@
       align-items: center;
       background: #121212;
       padding: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     .video-container {
@@ -56,6 +58,7 @@
       gap: 15px;
       flex-wrap: wrap;
       justify-content: center;
+      margin-bottom: 1rem;
     }
 
     .stream-btn {
@@ -76,6 +79,24 @@
       background-color: #555;
     }
 
+    /* Иста боја за pink_bh и toxic_tv копчиња */
+    .pink-toxic-btn {
+      background-color: #cc0077;
+      color: #fff;
+    }
+    .pink-toxic-btn:hover {
+      background-color: #e6009e;
+    }
+
+    iframe.stream-iframe {
+      width: 100%;
+      max-width: 800px;
+      height: 450px;
+      border: none;
+      display: none; /* Скриени по дифолт */
+      margin-bottom: 1rem;
+    }
+
     @media (max-width: 600px) {
       header, footer {
         font-size: 1rem;
@@ -93,6 +114,10 @@
         font-size: 1.1rem;
         padding: 12px 0;
       }
+
+      iframe.stream-iframe {
+        height: 300px;
+      }
     }
   </style>
 </head>
@@ -102,7 +127,7 @@
   </header>
 
   <main>
-    <div class="video-container">
+    <div class="video-container" id="main-player-container">
       <video
         id="my-video"
         class="video-js vjs-default-skin"
@@ -116,13 +141,38 @@
     </div>
 
     <div class="button-container">
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live1_1200.m3u8">Live 1</button>
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live2_1200.m3u8">Live 2</button>
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live3_1200.m3u8">Live 3</button>
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live4_1200.m3u8">Live 4</button>
-      <button class="stream-btn" data-src="https://edge8.pink.rs/pinktv/index.m3u8">Pink</button>
+      <!-- Копчиња за оригинален player -->
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live1_1200.m3u8">Elita 1</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live2_1200.m3u8">Elita 2</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live3_1200.m3u8">Elita 3</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live4_1200.m3u8">Elita 4</button>
+      <button class="stream-btn" data-src="https://edge8.pink.rs/pinktv/index.m3u8" id="pink-tv-btn">Pink TV</button>
       <button class="stream-btn" data-src="https://edge8.pink.rs/redtv/index.m3u8">Red TV</button>
+      
+      <!-- Копчиња за iframe player -->
+      <button class="stream-btn pink-toxic-btn" data-target="pink_bh_iframe">Pink BH</button>
+      <button class="stream-btn pink-toxic-btn" data-target="toxic_tv_iframe">Toxic TV</button>
     </div>
+
+    <!-- iframe плеери -->
+    <iframe
+      id="pink_bh_iframe"
+      class="stream-iframe"
+      data-src="https://balkantelevizija.net/iptv-panel/repository/pink_bh.php"
+      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen="allowfullscreen"
+      scrolling="no"
+      frameborder="0"></iframe>
+
+    <iframe
+      id="toxic_tv_iframe"
+      class="stream-iframe"
+      data-src="https://balkantelevizija.net/iptv-panel/repository/toxic_tv.php"
+      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen="allowfullscreen"
+      scrolling="no"
+      frameborder="0"></iframe>
+
   </main>
 
   <footer>
@@ -138,7 +188,7 @@
     let retryInterval = null;
 
     function attemptRecovery(src) {
-      if (retryInterval) return; // Веќе се обидуваме
+      if (retryInterval) return;
 
       console.log('Stream error detected. Starting recovery attempts...');
 
@@ -153,9 +203,9 @@
             player.play();
           }
         }).catch(() => {
-          // Stream сè уште не е достапен — ќе се проба повторно
+          // Stream not yet available, will retry
         });
-      }, 10000); // секои 10 секунди
+      }, 10000); // every 10 seconds
     }
 
     player.ready(function () {
@@ -177,15 +227,80 @@
       attemptRecovery(currentSrc);
     });
 
-    const buttons = document.querySelectorAll('.stream-btn');
-    buttons.forEach(button => {
+    // Функции за прикажување и кривање на iframe и главен player
+    function hideIframeAndStop(iframe) {
+      iframe.style.display = 'none';
+      iframe.src = '';
+    }
+
+    function showIframeAndPlay(iframe) {
+      const src = iframe.getAttribute('data-src');
+      iframe.src = src;
+      iframe.style.display = 'block';
+    }
+
+    function hideAllIframesAndStop() {
+      const iframes = document.querySelectorAll('.stream-iframe');
+      iframes.forEach(iframe => {
+        hideIframeAndStop(iframe);
+      });
+    }
+
+    function showMainPlayer() {
+      const container = document.getElementById('main-player-container');
+      container.style.display = 'block';
+
+      // Ресетирај и пушти player за свеж старт
+      player.reset();
+      player.play();
+    }
+
+    function hideMainPlayer() {
+      const container = document.getElementById('main-player-container');
+      container.style.display = 'none';
+
+      // Пауза и ресет за целосно стопирање
+      player.pause();
+      player.reset();
+    }
+
+    // Копчиња за оригинален player
+    const normalButtons = document.querySelectorAll('.stream-btn[data-src]');
+    normalButtons.forEach(button => {
       button.addEventListener('click', () => {
         const newSrc = button.getAttribute('data-src');
-        player.pause();
-        player.reset();
+
+        // Скрии iframe и стопирај ги
+        hideAllIframesAndStop();
+
+        // Прикажи и пушти video.js player
+        showMainPlayer();
+
         player.src({ src: newSrc, type: 'application/x-mpegURL' });
         player.load();
         player.play();
+
+        if (retryInterval) {
+          clearInterval(retryInterval);
+          retryInterval = null;
+        }
+      });
+    });
+
+    // Копчиња за iframe player (Pink BH, Toxic TV)
+    const streamButtons = document.querySelectorAll('.stream-btn[data-target]');
+    streamButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Скрии и стопирај video.js player
+        hideMainPlayer();
+
+        // Скрии и стопирај сите iframe player-и
+        hideAllIframesAndStop();
+
+        // Прикажи и пушти избраниот iframe player
+        const targetId = button.getAttribute('data-target');
+        const iframe = document.getElementById(targetId);
+        showIframeAndPlay(iframe);
 
         if (retryInterval) {
           clearInterval(retryInterval);
