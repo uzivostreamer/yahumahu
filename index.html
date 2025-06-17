@@ -37,8 +37,6 @@
       align-items: center;
       background: #121212;
       padding: 1rem;
-      max-width: 900px;
-      margin: 0 auto;
     }
 
     .video-container {
@@ -55,10 +53,11 @@
 
     .button-container {
       display: flex;
-      gap: 15px;
       flex-wrap: wrap;
+      gap: 15px;
       justify-content: center;
-      margin-bottom: 1rem;
+      max-width: 660px;
+      margin: 0 auto;
     }
 
     .stream-btn {
@@ -70,31 +69,13 @@
       font-size: 1rem;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      flex: 1 1 120px;
+      flex: 0 1 calc(25% - 15px);
       max-width: 150px;
       text-align: center;
     }
 
     .stream-btn:hover {
       background-color: #555;
-    }
-
-    /* Иста боја за pink_bh и toxic_tv копчиња */
-    .pink-toxic-btn {
-      background-color: #cc0077;
-      color: #fff;
-    }
-    .pink-toxic-btn:hover {
-      background-color: #e6009e;
-    }
-
-    iframe.stream-iframe {
-      width: 100%;
-      max-width: 800px;
-      height: 450px;
-      border: none;
-      display: none; /* Скриени по дифолт */
-      margin-bottom: 1rem;
     }
 
     @media (max-width: 600px) {
@@ -114,10 +95,6 @@
         font-size: 1.1rem;
         padding: 12px 0;
       }
-
-      iframe.stream-iframe {
-        height: 300px;
-      }
     }
   </style>
 </head>
@@ -127,7 +104,7 @@
   </header>
 
   <main>
-    <div class="video-container" id="main-player-container">
+    <div class="video-container">
       <video
         id="my-video"
         class="video-js vjs-default-skin"
@@ -141,38 +118,22 @@
     </div>
 
     <div class="button-container">
-      <!-- Копчиња за оригинален player -->
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live1_1200.m3u8">Elita 1</button>
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live2_1200.m3u8">Elita 2</button>
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live3_1200.m3u8">Elita 3</button>
-      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live4_1200.m3u8">Elita 4</button>
-      <button class="stream-btn" data-src="https://edge8.pink.rs/pinktv/index.m3u8" id="pink-tv-btn">Pink TV</button>
-      <button class="stream-btn" data-src="https://edge8.pink.rs/redtv/index.m3u8">Red TV</button>
-      
-      <!-- Копчиња за iframe player -->
-      <button class="stream-btn pink-toxic-btn" data-target="pink_bh_iframe">Pink BH</button>
-      <button class="stream-btn pink-toxic-btn" data-target="toxic_tv_iframe">Toxic TV</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/1285.m3u8">Elita Live 1</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/19632.m3u8">Elita Live 2</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/19633.m3u8">Elita Live 3</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/19634.m3u8">Elita Live 4</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live1_1200.m3u8">Live 1 [Web]</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live2_1200.m3u8">Live 2 [Web]</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live3_1200.m3u8">Live 3 [Web]</button>
+      <button class="stream-btn" data-src="https://webtvstream.bhtelecom.ba/hls19/zadruga_live4_1200.m3u8">Live 4 [Web]</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/1289.m3u8">Pink</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/1315.m3u8">Pink Plus</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/1311.m3u8">Pink BH</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/19630.m3u8">Pink M</button>
+      <button class="stream-btn" data-src="http://localiptv.site:85/live/TeslaVision@bizaro/WfdsagCTYYq7612DXZqwXz/1290.m3u8">Red TV</button>
+      <button class="stream-btn" data-src="https://edge8.pink.rs/pinktv/index.m3u8">Pink [Web]</button>
+      <button class="stream-btn" data-src="https://edge8.pink.rs/redtv/index.m3u8">Red TV [Web]</button>
     </div>
-
-    <!-- iframe плеери -->
-    <iframe
-      id="pink_bh_iframe"
-      class="stream-iframe"
-      data-src="https://balkantelevizija.net/iptv-panel/repository/pink_bh.php"
-      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen="allowfullscreen"
-      scrolling="no"
-      frameborder="0"></iframe>
-
-    <iframe
-      id="toxic_tv_iframe"
-      class="stream-iframe"
-      data-src="https://balkantelevizija.net/iptv-panel/repository/toxic_tv.php"
-      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen="allowfullscreen"
-      scrolling="no"
-      frameborder="0"></iframe>
-
   </main>
 
   <footer>
@@ -203,9 +164,9 @@
             player.play();
           }
         }).catch(() => {
-          // Stream not yet available, will retry
+          // Не е достапен, ќе се проба пак
         });
-      }, 10000); // every 10 seconds
+      }, 10000);
     }
 
     player.ready(function () {
@@ -227,80 +188,15 @@
       attemptRecovery(currentSrc);
     });
 
-    // Функции за прикажување и кривање на iframe и главен player
-    function hideIframeAndStop(iframe) {
-      iframe.style.display = 'none';
-      iframe.src = '';
-    }
-
-    function showIframeAndPlay(iframe) {
-      const src = iframe.getAttribute('data-src');
-      iframe.src = src;
-      iframe.style.display = 'block';
-    }
-
-    function hideAllIframesAndStop() {
-      const iframes = document.querySelectorAll('.stream-iframe');
-      iframes.forEach(iframe => {
-        hideIframeAndStop(iframe);
-      });
-    }
-
-    function showMainPlayer() {
-      const container = document.getElementById('main-player-container');
-      container.style.display = 'block';
-
-      // Ресетирај и пушти player за свеж старт
-      player.reset();
-      player.play();
-    }
-
-    function hideMainPlayer() {
-      const container = document.getElementById('main-player-container');
-      container.style.display = 'none';
-
-      // Пауза и ресет за целосно стопирање
-      player.pause();
-      player.reset();
-    }
-
-    // Копчиња за оригинален player
-    const normalButtons = document.querySelectorAll('.stream-btn[data-src]');
-    normalButtons.forEach(button => {
+    const buttons = document.querySelectorAll('.stream-btn');
+    buttons.forEach(button => {
       button.addEventListener('click', () => {
         const newSrc = button.getAttribute('data-src');
-
-        // Скрии iframe и стопирај ги
-        hideAllIframesAndStop();
-
-        // Прикажи и пушти video.js player
-        showMainPlayer();
-
+        player.pause();
+        player.reset();
         player.src({ src: newSrc, type: 'application/x-mpegURL' });
         player.load();
         player.play();
-
-        if (retryInterval) {
-          clearInterval(retryInterval);
-          retryInterval = null;
-        }
-      });
-    });
-
-    // Копчиња за iframe player (Pink BH, Toxic TV)
-    const streamButtons = document.querySelectorAll('.stream-btn[data-target]');
-    streamButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        // Скрии и стопирај video.js player
-        hideMainPlayer();
-
-        // Скрии и стопирај сите iframe player-и
-        hideAllIframesAndStop();
-
-        // Прикажи и пушти избраниот iframe player
-        const targetId = button.getAttribute('data-target');
-        const iframe = document.getElementById(targetId);
-        showIframeAndPlay(iframe);
 
         if (retryInterval) {
           clearInterval(retryInterval);
