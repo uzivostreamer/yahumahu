@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <title>Simanovci Weather</title>
+  <style>
+    body {
+      background: transparent;
+      font-family: Arial;
+      color: white;
+      font-size: 24px;
+      padding: 20px;
+    }
+    .weather-box {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="weather-box" id="weather">
+    ⏰ - Вчитување...<br>
+    📅 - Вчитување...<br>
+    📍 - Simanovci (---°C)
+  </div>
+
+  <script>
+    function updateWeather() {
+      const now = new Date();
+      const time = now.toLocaleTimeString("sr-RS", { hour: "2-digit", minute: "2-digit" });
+      const date = now.toLocaleDateString("sr-RS");
+
+      fetch("https://api.open-meteo.com/v1/forecast?latitude=44.823&longitude=20.002&current=temperature_2m&timezone=auto")
+        .then(res => res.json())
+        .then(data => {
+          const temp = data.current.temperature_2m;
+          document.getElementById("weather").innerHTML =
+            `⏰ - ${time}<br>📅 - ${date}<br>📍 - Simanovci (${temp}°C)`;
+        })
+        .catch(err => {
+          document.getElementById("weather").innerHTML = "⛔ Грешка при вчитување на податоци.";
+        });
+    }
+
+    updateWeather();
+    setInterval(updateWeather, 60000);
+  </script>
+</body>
+</html>
